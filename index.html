@@ -281,8 +281,9 @@
   function salva(v) {
     try { localStorage.setItem(CHIAVE, JSON.stringify(v)); } catch (e) {}
   }
+  // «una persona», non «1 persona»: nel Bodoni un 1 da solo sembra una I.
   function formatta(n) {
-    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return n === 1 ? "una" : String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
   function scrivi(testo) { nota.textContent = testo; }
 
