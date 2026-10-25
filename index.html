@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="it" data-stato="bloccato">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>paga1euro</title>
+<meta name="description" content="Paga 1 euro per sapere quante persone hanno pagato 1 euro.">
+<meta name="theme-color" content="#e8be3d">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="paga1euro">
+<meta property="og:title" content="paga1euro">
+<meta property="og:description" content="Paga 1 euro per sapere quante persone hanno pagato 1 euro.">
+<meta property="og:url" content="https://andreramolivaz.github.io/paga1euro/">
+<meta property="og:image" content="https://andreramolivaz.github.io/paga1euro/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="La frase «Paga 1 euro per sapere che … persone hanno pagato 1 euro», con il numero coperto da una striscia argentata.">
+<meta property="og:locale" content="it_IT">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="fonts/bodoni-moda.woff2" as="font" type="font/woff2" crossorigin>
+<script>
+  // Prima di disegnare: chi ha già pagato (o torna adesso da Stripe) non deve vedere lo stato bloccato.
+  try {
+    var sid = new URLSearchParams(location.search).get("session_id");
+    if ((sid && /^cs_(live|test)_/.test(sid)) || localStorage.getItem("paga1euro")) {
+      document.documentElement.dataset.stato = "pagato";
+    }
+  } catch (e) {}
+</script>
+<style>
+  @font-face {
+    font-family: "Bodoni Moda";
+    src: url("fonts/bodoni-moda.woff2") format("woff2");
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    /* I colori della moneta da 1 euro: l'anello d'ottone e il cuore d'argento. */
+    --ottone: #e8be3d;
+    --bronzo: #1c1505;
+    --bronzo-chiaro: #3a2e12;
+    --margine: clamp(1.25rem, 5vw, 4.5rem);
+    color-scheme: light;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    background: var(--ottone);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 3rem;
+    padding:
+      max(var(--margine), env(safe-area-inset-top))
+      max(var(--margine), env(safe-area-inset-right))
+      max(var(--margine), env(safe-area-inset-bottom))
+      max(var(--margine), env(safe-area-inset-left));
+    background: var(--ottone);
+    color: var(--bronzo);
+    font-family: "Bodoni Moda", "Bodoni 72", Didot, "Bodoni MT", Georgia, serif;
+    font-optical-sizing: auto;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main { align-self: center; }
+
+  h1 {
+    margin: 0 0 0.45em;
+    max-width: 13.5em;
+    font-size: clamp(2.75rem, min(13vw, 12.5vh), 9rem);
+    font-size: clamp(2.75rem, min(13vw, 12.5svh), 9rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+
+  /* La striscia argentata: copre il numero finché non la gratti.
+     Il numero resta al suo posto nella frase; la vernice sborda un poco intorno,
+     da poco sotto la linea di base a poco sopra le cifre più alte. */
+  .striscia {
+    position: relative;
+    display: inline-flex;
+    border-radius: 0.06em;
+    font-variant-numeric: lining-nums tabular-nums;
+    letter-spacing: 0;
+  }
+
+  .numero {
+    line-height: 0.8;
+    visibility: hidden;
+  }
+
+  .striscia::before,
+  .striscia canvas {
+    content: "";
+    position: absolute;
+    top: -0.068em;
+    right: -0.09em;
+    bottom: -0.012em;
+    left: -0.05em;
+    width: calc(100% + 0.14em);
+    height: calc(100% + 0.08em);
+    border-radius: inherit;
+  }
+  .striscia::before { background: linear-gradient(115deg, #bfc4cb, #eef0f3 42%, #dde1e5 50%, #a2a8b0); }
+  .striscia.dipinta::before { display: none; }
+
+  .striscia canvas { transition: opacity 0.6s ease; }
+  .striscia canvas.via { opacity: 0; }
+
+  [data-stato="pagato"] .striscia canvas {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23e8be3d' stroke='%231c1505' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23d3d7dc' stroke='%231c1505' stroke-width='1.5'/%3E%3C/svg%3E") 16 16, grab;
+    touch-action: none;
+  }
+
+  .striscia.no { animation: no 0.45s ease; }
+  @keyframes no {
+    20% { transform: translateX(-0.05em) rotate(-1.5deg); }
+    45% { transform: translateX(0.05em) rotate(1.5deg); }
+    70% { transform: translateX(-0.025em); }
+  }
+
+  .azioni {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+  }
+
+  .bottone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.5rem;
+    padding: 0 2rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--bronzo);
+    color: var(--ottone);
+    font: inherit;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+  }
+  .bottone:active { transform: scale(0.98); }
+  @media (hover: hover) {
+    .bottone:hover { background: var(--bronzo-chiaro); }
+  }
+
+  .nota {
+    margin: 0;
+    max-width: 30ch;
+  }
+
+  .testo {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+
+  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+
+  :focus-visible {
+    outline: 3px solid var(--bronzo);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+  .bottone:focus-visible { border-radius: 999px; }
+
+  footer { font-size: 0.9375rem; }
+
+  [hidden] { display: none !important; }
+
+  [data-stato="bloccato"] .solo-pagato,
+  [data-stato="pagato"] .solo-bloccato,
+  [data-stato="rivelato"] .solo-bloccato { display: none; }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 34rem) {
+    .bottone { width: 100%; }
+  }
+
+  /* Sugli schermi a bassa densità i filetti sottilissimi del Bodoni spariscono:
+     un taglio ottico più robusto tiene leggibili le «e». */
+  @media (max-resolution: 1.49dppx), (-webkit-max-device-pixel-ratio: 1.49) {
+    h1 { font-variation-settings: "opsz" 40; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .striscia.no { animation: none; }
+    .striscia canvas, .bottone { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>
+    <span class="solo-bloccato">Paga</span><span class="solo-pagato">Hai pagato</span> un&nbsp;euro per sapere
+    <span aria-hidden="true">che <span class="striscia" id="striscia"><span class="numero" id="numero">0000</span><canvas></canvas></span></span><span class="sr" id="numero-sr">quante</span>
+    <span id="coda">persone hanno pagato</span> un&nbsp;euro.
+  </h1>
+
+  <div class="azioni">
+    <!-- Il tuo Payment Link di Stripe va al posto del # qui sotto (https://buy.stripe.com/…). -->
+    <a class="bottone solo-bloccato" id="paga" href="#">Paga un euro</a>
+    <button class="bottone" id="condividi" type="button" hidden>Condividi</button>
+    <p class="nota">
+      <span id="nota" aria-live="polite"><span class="solo-bloccato">Si paga su Stripe, poi torni qui e gratti la striscia.</span></span>
+      <button class="testo" id="mostra" type="button" hidden>Mostra il numero</button>
+    </p>
+  </div>
+  <noscript><p class="nota">Per grattare la striscia serve JavaScript.</p></noscript>
+</main>
+
+<footer>
+  <a href="https://github.com/andreramolivaz/paga1euro">Il codice è su GitHub</a>
+</footer>
+
+<script>
+(function () {
+  var radice = document.documentElement;
+  var striscia = document.getElementById("striscia");
+  var numero = document.getElementById("numero");
+  var numeroSr = document.getElementById("numero-sr");
+  var coda = document.getElementById("coda");
+  var tela = striscia.querySelector("canvas");
+  var ctx = tela.getContext("2d", { willReadFrequently: true });
+  var nota = document.getElementById("nota");
+  var mostra = document.getElementById("mostra");
+  var paga = document.getElementById("paga");
+  var condividi = document.getElementById("condividi");
+
+  var CHIAVE = "paga1euro";
+  var SEI_ORE = 6 * 60 * 60 * 1000;
+
+  var persone = 0;
+  var grattabile = false;
+  var finito = false;
+  var graffi = 0;
+
+  function leggi() {
+    try {
+      var v = JSON.parse(localStorage.getItem(CHIAVE));
+      return v && typeof v.sid === "string" && typeof v.alle === "number" ? v : null;
+    } catch (e) { return null; }
+  }
+  function salva(v) {
+    try { localStorage.setItem(CHIAVE, JSON.stringify(v)); } catch (e) {}
+  }
+  // «una persona», non «1 persona»: nel Bodoni un 1 da solo sembra una I.
+  function formatta(n) {
+    return n === 1 ? "una" : String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+  function scrivi(testo) { nota.textContent = testo; }
+
+  // Chi torna da Stripe porta con sé l'id della sessione di pagamento.
+  var query = new URLSearchParams(location.search);
+  var sid = query.get("session_id");
+  var pagamento = leggi();
+  if (sid && /^cs_(live|test)_[A-Za-z0-9]{8,}$/.test(sid)) {
+    pagamento = { sid: sid, alle: Date.now() };
+    salva(pagamento);
+  }
+  if (query.has("session_id")) {
+    history.replaceState(null, "", location.pathname + location.hash);
+  }
+
+  // La vernice argentata, con un po' di grana.
+  function dipingi() {
+    var r = tela.getBoundingClientRect();
+    var dpr = Math.min(window.devicePixelRatio || 1, 3);
+    var w = (tela.width = Math.max(1, Math.round(r.width * dpr)));
+    var h = (tela.height = Math.max(1, Math.round(r.height * dpr)));
+    ctx.globalCompositeOperation = "source-over";
+    var luce = ctx.createLinearGradient(0, 0, w, h * 2.4);
+    luce.addColorStop(0, "#bfc4cb");
+    luce.addColorStop(0.42, "#eef0f3");
+    luce.addColorStop(0.5, "#dde1e5");
+    luce.addColorStop(1, "#a2a8b0");
+    ctx.fillStyle = luce;
+    ctx.fillRect(0, 0, w, h);
+    // Il motivo stampato sulla vernice, come sui biglietti da grattare: tanti piccoli €.
+    var passo = h * 0.42;
+    var raggio = h * 0.085;
+    ctx.strokeStyle = "rgba(88, 95, 104, 0.24)";
+    ctx.lineWidth = raggio * 0.28;
+    for (var riga = 0, y = passo * 0.3; y < h + passo; riga++, y += passo) {
+      for (var x = (riga % 2) * passo * 0.5 + passo * 0.25; x < w + passo; x += passo) {
+        ctx.beginPath();
+        ctx.arc(x, y, raggio, Math.PI * 0.27, Math.PI * 1.73);
+        ctx.moveTo(x - raggio * 1.3, y - raggio * 0.24);
+        ctx.lineTo(x + raggio * 0.3, y - raggio * 0.24);
+        ctx.moveTo(x - raggio * 1.3, y + raggio * 0.24);
+        ctx.lineTo(x + raggio * 0.3, y + raggio * 0.24);
+        ctx.stroke();
+      }
+    }
+    var img = ctx.getImageData(0, 0, w, h);
+    var d = img.data;
+    for (var i = 0; i < d.length; i += 4) {
+      var g = (Math.random() - 0.5) * 30;
+      d[i] += g; d[i + 1] += g; d[i + 2] += g;
+    }
+    ctx.putImageData(img, 0, 0);
+    graffi = 0;
+    striscia.classList.add("dipinta");
+  }
+
+  function punto(e) {
+    var r = tela.getBoundingClientRect();
+    return {
+      x: (e.clientX - r.left) * (tela.width / r.width),
+      y: (e.clientY - r.top) * (tela.height / r.height)
+    };
+  }
+
+  function gratta(a, b) {
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.lineWidth = tela.height * 0.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x + 0.01, b.y);
+    ctx.stroke();
+    graffi++;
+  }
+
+  // Quando è venuta via più di metà vernice, il resto cade da solo.
+  function controlla() {
+    var d = ctx.getImageData(0, 0, tela.width, tela.height).data;
+    var passo = 4 * Math.max(1, Math.floor(d.length / 4 / 5000));
+    var vuoti = 0, tutti = 0;
+    for (var i = 3; i < d.length; i += passo) {
+      tutti++;
+      if (d[i] < 128) vuoti++;
+    }
+    if (vuoti / tutti > 0.5) rivela();
+  }
+
+  function rifiuta() {
+    striscia.classList.remove("no");
+    void striscia.offsetWidth;
+    striscia.classList.add("no");
+    scrivi("La striscia si gratta solo dopo aver pagato un euro.");
+  }
+
+  var ultimo = null;
+  tela.addEventListener("pointerdown", function (e) {
+    if (radice.dataset.stato === "bloccato") { rifiuta(); return; }
+    if (!grattabile) return;
+    e.preventDefault();
+    try { tela.setPointerCapture(e.pointerId); } catch (err) {}
+    ultimo = punto(e);
+    gratta(ultimo, ultimo);
+  });
+  tela.addEventListener("pointermove", function (e) {
+    if (!ultimo || !grattabile) return;
+    var p = punto(e);
+    gratta(ultimo, p);
+    ultimo = p;
+    if (graffi % 6 === 0) controlla();
+  });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(function (tipo) {
+    tela.addEventListener(tipo, function () {
+      if (ultimo && grattabile) controlla();
+      ultimo = null;
+    });
+  });
+
+  function rivela() {
+    if (finito) return;
+    finito = true;
+    grattabile = false;
+    radice.dataset.stato = "rivelato";
+    numero.style.visibility = "visible";
+    tela.classList.add("via");
+    setTimeout(function () { tela.remove(); }, 650);
+    coda.textContent = persone === 1 ? "persona ha pagato" : "persone hanno pagato";
+    numeroSr.textContent = "che " + formatta(persone);
+    scrivi(persone === 1
+      ? "Quella persona sei tu."
+      : "Ci sei anche tu. Il numero si aggiorna ogni dieci minuti circa.");
+    condividi.hidden = false;
+    if (document.activeElement === mostra) condividi.focus({ preventScroll: true });
+    mostra.hidden = true;
+  }
+
+  function impronta(testo) {
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(testo)).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+        return b.toString(16).padStart(2, "0");
+      }).join("").slice(0, 12);
+    });
+  }
+
+  // Il contatore si aggiorna ogni pochi minuti: chi ha appena pagato lo contiamo noi, subito.
+  function conta() {
+    return fetch("count.json?v=" + Date.now(), { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("count.json " + r.status);
+        return r.json();
+      })
+      .then(function (dati) {
+        var totale = Number(dati.persone) || 0;
+        var ultimi = Array.isArray(dati.ultimi) ? dati.ultimi : [];
+        if (Date.now() - pagamento.alle > SEI_ORE) return totale;
+        return impronta(pagamento.sid)
+          .then(function (mio) { return ultimi.indexOf(mio) >= 0; })
+          .catch(function () { return false; })
+          .then(function (incluso) { return totale + (incluso ? 0 : 1); });
+      });
+  }
+
+  function pagato() {
+    radice.dataset.stato = "pagato";
+    scrivi("Un attimo, sto contando…");
+    dipingi();
+    conta().then(function (n) {
+      persone = n;
+      numero.textContent = formatta(n);
+      dipingi();
+      numero.style.visibility = "visible";
+      grattabile = true;
+      scrivi("Gratta la striscia argentata.");
+      mostra.hidden = false;
+    }).catch(function () {
+      scrivi("Non riesco a leggere il numero adesso. Ricarica la pagina tra poco.");
+    });
+  }
+
+  function bloccato() {
+    radice.dataset.stato = "bloccato";
+    dipingi();
+    var attivo = /^https:\/\/buy\.stripe\.com\//.test(paga.getAttribute("href"));
+    paga.addEventListener("click", function (e) {
+      if (attivo) return;
+      e.preventDefault();
+      scrivi("I pagamenti non sono ancora attivi. Riprova tra poco.");
+    });
+  }
+
+  mostra.addEventListener("click", rivela);
+
+  condividi.addEventListener("click", function () {
+    var url = location.origin + location.pathname;
+    var dati = { title: "paga1euro", text: "Ho pagato un euro per sapere quante persone hanno pagato un euro.", url: url };
+    if (navigator.share) {
+      navigator.share(dati).catch(function () {});
+      return;
+    }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(
+        function () { scrivi("Link copiato. Mandalo a chi vuoi."); },
+        function () { scrivi(url); }
+      );
+    } else {
+      scrivi(url);
+    }
+  });
+
+  // Se la striscia cambia misura (font caricato, schermo ruotato), ridipingi la vernice.
+  if ("ResizeObserver" in window) {
+    var misura = "";
+    new ResizeObserver(function (voci) {
+      var r = voci[0].contentRect;
+      var nuova = Math.round(r.width) + "x" + Math.round(r.height);
+      if (nuova === misura) return;
+      misura = nuova;
+      if (!finito && graffi === 0) dipingi();
+    }).observe(striscia);
+  }
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { if (!finito && graffi === 0) dipingi(); });
+  }
+
+  if (pagamento) pagato(); else bloccato();
+})();
+</script>
+</body>
+</html>

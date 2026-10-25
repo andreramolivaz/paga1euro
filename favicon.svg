@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="30" fill="#e8be3d" stroke="#1c1505" stroke-width="3"/>
+  <circle cx="32" cy="32" r="19" fill="#d3d7dc" stroke="#1c1505" stroke-width="2.5"/>
+  <path fill="#1c1505" transform="translate(32 32) scale(0.0147 -0.0147) translate(-555 -750)" d="M360 20V1428H134V1500H790V20ZM100 0V72H1010V0Z"/>
+</svg>
